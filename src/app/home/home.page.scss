@@ -1,27 +1,226 @@
-#container {
+// --- 配色盤 ---
+$bg-cream: #FAF9F6;      // 米白色背景
+$primary-green: #8DA399; // 莫蘭迪綠
+$text-dark: #4A4A4A;     // 深灰字體 (不要純黑)
+$card-white: #FFFFFF;
+$accent-orange: #E6B89C; // 溫暖的點綴色
+
+// 全域設定
+.baby-theme {
+  --background: #{$bg-cream};
+  font-family: 'Varela Round', system-ui, sans-serif; // 嘗試用圓體
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+  // --- 新增以下 RWD 設定 ---
+
+  // 設定最大寬度，大約是平板或大手機的寬度
+  max-width: 500px;
+
+  // 讓它在畫面中間水平置中
+  margin: 0 auto;
+
+  // (選用) 在電腦版顯示時，給它一點與頂部的距離，比較好閱讀
+  @media (min-width: 550px) {
+    margin-top: 20px;
+  }
+}
+
+// 1. 標題區
+.header-section {
   text-align: center;
+  padding-top: 40px;
+  margin-bottom: 30px;
+  color: $text-dark;
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  .app-title {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    opacity: 0.6;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .total-balance {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #5F7A6E; // 深一點的綠色
+    .currency { font-size: 1.5rem; vertical-align: top; }
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #888;
+    background: rgba(255,255,255,0.6);
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+  }
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+// 2. 輸入大卡片
+.input-box {
+  background: $card-white;
+  border-radius: 30px; // 超圓角
+  padding: 25px;
+  box-shadow: 0 10px 40px rgba(141, 163, 153, 0.15); // 柔和陰影
+  margin-bottom: 30px;
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
+.row-inputs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-#container a {
-  text-decoration: none;
+// 日期按鈕
+ion-datetime-button {
+  ::part(native) {
+    background: #F0F2F1;
+    color: $text-dark;
+    border-radius: 15px;
+    font-weight: bold;
+  }
+}
+
+// 金額輸入
+.amount-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #F0F2F1;
+  border-radius: 20px;
+  padding: 0 15px;
+  width: 60%;
+
+  .symbol { font-size: 1.2rem; color: #999; margin-right: 5px; }
+  .big-input {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: $text-dark;
+    --padding-top: 10px;
+    --padding-bottom: 10px;
+    --placeholder-color: #ccc;
+  }
+}
+
+// 描述輸入
+.desc-input-wrapper {
+  background: #fff;
+  border: 2px solid #F0F2F1;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  padding: 5px 15px;
+  ion-input { --placeholder-opacity: 0.4; }
+}
+
+// 類別選擇 (Emoji 按鈕)
+.category-selector {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 10px;
+
+  .cat-option {
+    flex: 1;
+    text-align: center;
+    padding: 10px 5px;
+    border-radius: 18px;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    cursor: pointer;
+    background: #FAFAFA;
+
+    .emoji { font-size: 1.5rem; margin-bottom: 5px; filter: grayscale(100%); opacity: 0.5; }
+    span { font-size: 0.8rem; color: #999; font-weight: bold; }
+
+    &.active {
+      background: rgba(141, 163, 153, 0.1); // 淡淡的綠底
+      border-color: $primary-green;
+      .emoji { filter: grayscale(0); opacity: 1; transform: scale(1.1); }
+      span { color: $primary-green; }
+    }
+  }
+}
+
+// 付款人丸子
+.spender-selector {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+
+  .pill {
+    padding: 8px 20px;
+    background: #F0F2F1;
+    color: #999;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+
+    &.active {
+      background: $text-dark; // 選中變深灰
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+  }
+}
+
+// 存檔按鈕
+.save-btn {
+  width: 100%;
+  padding: 18px;
+  background: $primary-green;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  box-shadow: 0 8px 20px rgba(141, 163, 153, 0.4);
+
+  &:active { transform: scale(0.98); }
+}
+
+// 3. 列表區
+.list-header {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: $text-dark;
+  margin-bottom: 15px;
+  padding-left: 10px;
+}
+
+.cute-card {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 25px; // 也很圓
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+
+  .card-icon {
+    font-size: 1.8rem;
+    margin-right: 15px;
+    background: #F9F9F9;
+    width: 50px; height: 50px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+  }
+
+  .card-info {
+    flex: 1;
+    .card-desc { font-weight: bold; color: $text-dark; margin-bottom: 4px; font-size: 1rem; }
+    .card-meta { font-size: 0.8rem; color: #aaa; }
+  }
+
+  .card-amount {
+    font-weight: 800;
+    color: $text-dark;
+    font-size: 1.1rem;
+  }
 }

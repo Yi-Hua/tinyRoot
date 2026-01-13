@@ -1,20 +1,87 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="baby-theme">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="container">
+    <div class="header-section">
+      <div class="app-title">🌱 Tiny Root</div>
+      <div class="total-balance">
+        <span class="currency">$</span>
+        {{ totalExpense | number }}
+      </div>
+      <div class="subtitle">本月家庭支出</div>
+    </div>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+    <div class="input-box">
+      <div class="row-inputs">
+        <div class="date-picker-wrapper">
+          <ion-datetime-button datetime="datetime"></ion-datetime-button>
+          <ion-modal [keepContentsMounted]="true">
+            <ng-template>
+              <ion-datetime id="datetime" presentation="date" [(ngModel)]="newDate"></ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </div>
+
+        <div class="amount-input-wrapper">
+          <span class="symbol">$</span>
+          <ion-input type="number" placeholder="0" [(ngModel)]="newAmount" class="big-input"></ion-input>
+        </div>
+      </div>
+
+      <div class="desc-input-wrapper">
+        <ion-input type="text" placeholder="📝 買了什麼呢？(例如: 尿布)" [(ngModel)]="newDesc"></ion-input>
+      </div>
+
+      <div class="category-selector">
+        <div class="cat-option"
+             [class.active]="newCategory === 'Needs'"
+             (click)="newCategory = 'Needs'">
+          <div class="emoji">🔴</div>
+          <span>必要</span>
+        </div>
+        <div class="cat-option"
+             [class.active]="newCategory === 'Wants'"
+             (click)="newCategory = 'Wants'">
+          <div class="emoji">🟡</div>
+          <span>想要</span>
+        </div>
+        <div class="cat-option"
+             [class.active]="newCategory === 'Savings'"
+             (click)="newCategory = 'Savings'">
+          <div class="emoji">🟢</div>
+          <span>存錢</span>
+        </div>
+      </div>
+
+      <div class="spender-selector">
+        <div class="pill" [class.active]="newSpender === 'Dad'" (click)="newSpender = 'Dad'">
+          👨🏻 爸爸
+        </div>
+        <div class="pill" [class.active]="newSpender === 'Mom'" (click)="newSpender = 'Mom'">
+          👩🏻 媽媽
+        </div>
+      </div>
+
+      <button class="save-btn" (click)="add()">
+        記下一筆
+      </button>
+    </div>
+
+    <div class="list-section">
+      <div class="list-header">最近紀錄</div>
+
+      <div *ngFor="let t of transactions" class="cute-card">
+        <div class="card-icon">
+          {{ t.category === 'Needs' ? '🍼' : (t.category === 'Wants' ? '🧸' : '🌱') }}
+        </div>
+        <div class="card-info">
+          <div class="card-desc">{{ t.description }}</div>
+          <div class="card-meta">{{ t.date | date:'M/d' }} · {{ t.spender === 'Dad' ? '👨🏻' : '👩🏻' }}</div>
+        </div>
+        <div class="card-amount">
+          {{ t.amount | number }}
+        </div>
+      </div>
+    </div>
+
   </div>
 </ion-content>
