@@ -61,7 +61,7 @@
         </div>
       </div>
 
-      <button class="save-btn" (click)="add()">
+      <button class="primary-btn" (click)="add()">
         記下一筆
       </button>
     </div>
@@ -69,16 +69,16 @@
     <div class="list-section">
       <div class="list-header">最近紀錄</div>
 
-      <div *ngFor="let t of transactions" class="cute-card">
+      <div *ngFor="let trans of transactions" class="cute-card">
         <div class="card-icon">
-          {{ t.category === 'Needs' ? '🍼' : (t.category === 'Wants' ? '🧸' : '🌱') }}
+          {{ trans.category === 'Needs' ? '🍼' : (trans.category === 'Wants' ? '🧸' : '🌱') }}
         </div>
         <div class="card-info">
-          <div class="card-desc">{{ t.description }}</div>
-          <div class="card-meta">{{ t.date | date:'M/d' }} · {{ t.spender === 'Dad' ? '👨🏻' : '👩🏻' }}</div>
+          <div class="card-desc">{{ trans.description }}</div>
+          <div class="card-meta">{{ trans.date | date:'M/d' }} · {{ trans.spender === 'Dad' ? '👨🏻' : '👩🏻' }}</div>
         </div>
         <div class="card-amount">
-          {{ t.amount | number }}
+          {{ trans.amount | number }}
         </div>
       </div>
     </div>

@@ -1,0 +1,35 @@
+<ion-content class="baby-theme">
+  <div class="login-container">
+
+    <div class="logo-area">
+      <div class="big-icon">🌱</div>
+      <h1>Tiny Root</h1>
+      <p>陪你紀錄生活的小樹根</p>
+    </div>
+
+    <div class="input-card">
+      <ion-item lines="none" class="custom-input">
+        <ion-icon slot="start" name="mail-outline" color="medium"></ion-icon>
+        <ion-input type="email" placeholder="Email" [(ngModel)]="email"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="custom-input">
+        <ion-icon slot="start" name="lock-closed-outline" color="medium"></ion-icon>
+        <ion-input type="password" placeholder="密碼" [(ngModel)]="password"></ion-input>
+      </ion-item>
+
+      <div class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <div class="action-buttons">
+        <ion-button expand="block" class="login-btn" (click)="handleLogin()">
+          登入
+        </ion-button>
+
+        <ion-button expand="block" fill="outline" class="register-btn" (click)="handleRegister()">
+          註冊新帳號
+        </ion-button>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

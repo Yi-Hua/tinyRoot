@@ -35,3 +35,234 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap');
+
+/* =========================================
+   🍃 Tiny Sprout 全域主題：極簡自然手帳風
+   ========================================= */
+
+// 1. 🎨 莫蘭迪色彩計畫 (Color Palette)
+$bg-grey-white: #F8F9FA;    // 頁面底色：乾淨純粹
+$forest-green: #4A5D4B;     // 森林深綠：標題、重點數字 (穩定與自然)
+$morandi-light: #F0F4F0;    // 莫蘭迪淺綠：輸入框背景、標籤 (視覺呼吸空間)
+$coral-pink: #E5989B;       // 珊瑚粉：驚喜點綴、刪除、重點 (溫暖)
+$text-main: #4A5D4B;        // 主要文字 (使用深綠取代純黑，更柔和)
+$text-light: #8C9E8D;       // 次要文字 (淺一點的灰綠)
+$card-white: #FFFFFF;
+
+// 2. 全域設定
+.baby-theme {
+  --background: #{$bg-grey-white};
+  // 使用 Noto Sans TC 搭配 Roboto，呈現數據感與人文感
+  font-family: 'Roboto', 'Noto Sans TC', system-ui, sans-serif;
+  color: $text-main;
+}
+
+ion-content {
+  --color: #{$text-main};
+}
+
+// 3. 📦 共用元件 - 圓角卡片 (Rounded Corners & Soft Shadows)
+// 筆記：強調「無負擔」的視覺，去除厚重邊框
+.input-box, .input-card {
+  background: $card-white;
+  border-radius: 20px; // 風格指南：12px - 20px
+  padding: 24px;
+
+  // 🔥 關鍵：極淡的陰影，讓介面浮起來但很輕盈
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  border: none; // 去除原本的粗框
+  margin-bottom: 24px;
+}
+
+// 4. 📝 共用元件 - 輸入框 (有機感)
+.custom-input {
+  --background: #{$morandi-light}; // 莫蘭迪淺綠背景
+  border-radius: 16px;             // 圓潤親和
+  margin-bottom: 20px;
+  --padding-start: 16px;
+
+  // 文字設定
+  --color: #{$text-main};
+  color: $text-main;
+  --placeholder-color: #AAB7AD;    // 淺灰綠提示字
+  caret-color: $coral-pink;        // 游標用珊瑚粉，帶點驚喜
+
+  border: 1px solid transparent;   // 預留邊框位置
+  transition: all 0.3s ease;
+
+  // 聚焦時，淡淡的綠色光暈
+  &.item-has-focus {
+    --background: #FFFFFF;
+    border-color: $forest-green;
+    box-shadow: 0 0 0 4px rgba(74, 93, 75, 0.1);
+  }
+
+  ion-icon {
+    color: $forest-green;
+    opacity: 0.6;
+    margin-right: 10px;
+  }
+}
+
+// 5. 🏷️ 共用元件 - 手帳感列表 (Transaction List)
+.cute-card {
+  background: $card-white;
+  padding: 16px 20px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+
+  // 輕微陰影
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0,0,0,0.01); // 極細微邊界
+
+  color: $text-main;
+
+  .card-icon {
+    font-size: 1.5rem;
+    margin-right: 16px;
+    background: $morandi-light; // 淺綠底
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 14px;        // 圓角矩形
+    color: $forest-green;
+  }
+
+  .card-info {
+    flex: 1;
+    .card-desc {
+      font-weight: 500;
+      color: $text-main;
+      margin-bottom: 4px;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+    .card-meta { font-size: 0.85rem; color: $text-light; }
+  }
+
+  // 數據感：數字刻意加大
+  .card-amount {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    color: $forest-green;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+  }
+}
+
+// 6. 🔘 按鈕風格 (親和力)
+.primary-btn {
+  --background: #{$forest-green}; // 森林深綠：象徵穩定
+  --background-hover: #{lighten($forest-green, 5%)};
+  --border-radius: 16px;
+  --color: #FFFFFF;
+  --box-shadow: 0 4px 12px rgba(74, 93, 75, 0.2); // 柔和的綠色陰影
+
+  font-weight: 500;
+  height: 52px;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  margin-top: 10px;
+}
+
+.outline-btn {
+  --background: transparent;
+  --color: #{$text-light};
+  --border-color: #{$morandi-light}; // 很淡的邊框
+  --border-radius: 16px;
+  --box-shadow: none;
+
+  font-weight: 500;
+  height: 52px;
+}
+
+// 7. 輔助類別 (Helpers)
+.text-forest { color: $forest-green; }
+.text-coral { color: $coral-pink; }
+.text-light { color: $text-light; }
+
+// 強調數據的樣式
+.big-number {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 2.5rem;
+  color: $forest-green;
+}
+
+// ... (上面保留原本的變數設定) ...
+
+// 6. 🔘 Material 風格按鈕 (已整合 Tiny Sprout 視覺)
+// 使用 ion-button，不僅有原生波紋效果，還能完美支援圓角設定
+
+.primary-btn {
+  // 設定按鈕高度與形狀
+  height: 56px;           // 稍微高一點，手指好點擊
+  font-size: 1.05rem;     // 字體大小
+  font-weight: 500;       // Roboto Medium
+  letter-spacing: 1px;    // 字距微開
+  margin-top: 16px;
+
+  // 🔥 核心樣式設定 (Ionic 變數)
+  --background: #{$forest-green};        // 森林深綠
+  --background-hover: #{lighten($forest-green, 5%)}; // 滑鼠懸停變亮
+  --background-activated: #{darken($forest-green, 5%)}; // 按下變深
+  --color: #FFFFFF;
+
+  --border-radius: 16px;                 // 風格指南：16px 圓角
+
+  // 🔥 Material Elevation (柔和陰影)
+  --box-shadow: 0 8px 16px rgba(74, 93, 75, 0.2);
+
+  // 去除原本按鈕的預設邊框 (確保乾淨)
+  --border-width: 0;
+
+  // 讓按鈕寬度佔滿容器 (通常在手機上是這樣)
+  width: 100%;
+
+  // 讓文字變為大寫 (Material Design 標準，可選，這裡依照手帳風我們可以不強制)
+  text-transform: none;
+}
+
+.outline-btn {
+  height: 56px;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 12px;
+  letter-spacing: 0.5px;
+
+  // 透明背景
+  --background: transparent;
+  --background-hover: #{$morandi-light}; // 懸停時出現淡淡綠色底
+
+  // 文字顏色
+  --color: #{$text-light};
+
+  // 邊框設定
+  --border-style: solid;
+  --border-width: 2px;
+  --border-color: #{$morandi-light}; // 莫蘭迪淺綠邊框
+  --border-radius: 16px;
+
+  --box-shadow: none; // 框線按鈕通常沒有陰影
+
+  width: 100%;
+  text-transform: none;
+}
+
+// 💥 補充：刪除/危險操作按鈕 (配合風格指南的珊瑚粉)
+.danger-btn {
+  height: 50px;
+  --background: #FFF;
+  --color: #{$coral-pink};
+  --border-radius: 16px;
+  --border-style: solid;
+  --border-width: 1px;
+  --border-color: #{$coral-pink};
+  --box-shadow: none;
+  font-weight: 500;
+
+  // 按下去時
+  --background-activated: #FFF0F0;
+}
