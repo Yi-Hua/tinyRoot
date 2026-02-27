@@ -1,5 +1,5 @@
 // 定義三種支出類別 (50/30/20 法則)
-export type BudgetCategory = 'Needs' | 'Wants' | 'Savings';
+export type BudgetCategory = 'Needs' | 'Wants' | 'Savings' | 'Culture';
 
 // 定義一筆交易的結構
 export interface Transaction {
@@ -10,4 +10,11 @@ export interface Transaction {
   amount: number;        // 金額
   category: BudgetCategory; // 類別
   spender: string;       // 付款人
+}
+
+export interface Category {
+  id: string;        // 分類代號 (例如: 'food')
+  name: string;      // 分類名稱 (例如: '飲食')
+  icon: string;      // 圖示名稱 (例如: 'fast-food-outline')
+  type: 'expense' | 'income'; // 支出或收入
 }

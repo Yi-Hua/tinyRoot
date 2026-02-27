@@ -1,0 +1,52 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="baby-theme">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" color="dark" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title style="color: #4A5D4B; font-weight: 700;">分類管理</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openAddModal()">
+        <ion-icon name="add-circle" style="color: #E5989B; font-size: 1.8rem;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="baby-theme">
+  <div class="rwd-container ion-padding">
+
+    <div class="segment-container">
+      <ion-segment [(ngModel)]="currentType" mode="ios" (ionChange)="segmentChanged()">
+        <ion-segment-button value="expense">
+          <ion-label>支出</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="income">
+          <ion-label>收入</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <ion-list class="category-list">
+      <ion-item-sliding *ngFor="let cat of filteredCategories">
+        <ion-item lines="none" class="cute-item">
+          <div class="emoji-icon" slot="start">{{ cat.icon }}</div>
+          <ion-label>
+            <h2>{{ cat.name }}</h2>
+          </ion-label>
+          <ion-icon name="reorder-two-outline" slot="end" color="medium"></ion-icon>
+        </ion-item>
+
+        <ion-item-options side="end">
+          <ion-item-option color="danger" (click)="deleteCategory(cat.id)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+
+    <div *ngIf="filteredCategories.length === 0" class="empty-state">
+      <div class="leaf">🍂</div>
+      <p>這裡空空的耶</p>
+    </div>
+
+  </div> </ion-content>

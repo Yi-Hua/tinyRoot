@@ -1,2 +1,11 @@
 // For information on how to create your own theme, please refer to:
 // https://ionicframework.com/docs/theming/
+/** primary (原本是藍色，改成 Tiny Sprout 森林綠) **/ㄌ
+:root {
+  --ion-color-primary: #4A5D4B;
+  --ion-color-primary-rgb: 74, 93, 75;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #415242;
+  --ion-color-primary-tint: #5c6d5d;
+}

@@ -139,24 +139,113 @@ ion-datetime-button {
   }
 }
 
-// 列表標題 (Subtitle with emotion)
-.list-header {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #4A5D4B;
-  margin-bottom: 16px;
-  padding-left: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+// 3️⃣ 支出者下拉選單
+.spender-selector {
+  margin-bottom: 20px;
 
-  // 加上一條細細的裝飾線
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
+  select {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #F0F4F0;
+    color: #4A5D4B;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Roboto', 'Noto Sans TC', system-ui, sans-serif;
+
+    &:hover {
+      border-color: #4A5D4B;
+      box-shadow: 0 0 0 3px rgba(74, 93, 75, 0.1);
+    }
+
+    &:focus {
+      outline: none;
+      background-color: #FFFFFF;
+      border-color: #4A5D4B;
+      box-shadow: 0 0 0 4px rgba(74, 93, 75, 0.15);
+    }
+
+    option {
+      color: #4A5D4B;
+      background-color: #FFFFFF;
+    }
+  }
+}
+
+// 📋 交易列表卡片
+.list-section {
+  margin-top: 32px;
+}
+
+.cute-card {
+  background: #FFFFFF;
+  padding: 16px 20px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0,0,0,0.01);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+
+  .card-icon {
+    font-size: 1.5rem;
+    margin-right: 16px;
     background: #F0F4F0;
-    margin-left: 16px;
-    margin-bottom: 5px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    color: #4A5D4B;
+  }
+
+  .card-info {
+    flex: 1;
+
+    .card-desc {
+      font-weight: 500;
+      color: #4A5D4B;
+      margin-bottom: 4px;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .card-meta {
+      font-size: 0.85rem;
+      color: #8C9E8D;
+    }
+  }
+
+  .card-amount {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    color: #4A5D4B;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+  }
+}
+
+// 按鈕美化
+ion-button[color="primary"] {
+  --background: #8fa18e;
+  --background-activated: #6d8f70;
+  --background-hover: #7d9e80;
+}
+
+ion-button[fill="outline"] {
+  --border-color: #8fa18e;
+  --color: #8fa18e;
+
+  &:hover {
+    background-color: rgba(139, 161, 142, 0.1);
   }
 }

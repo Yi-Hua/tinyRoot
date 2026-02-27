@@ -53,17 +53,15 @@
       </div>
 
       <div class="spender-selector">
-        <div class="pill" [class.active]="newSpender === 'Dad'" (click)="newSpender = 'Dad'">
-          👨🏻 爸爸
-        </div>
-        <div class="pill" [class.active]="newSpender === 'Mom'" (click)="newSpender = 'Mom'">
-          👩🏻 媽媽
-        </div>
+        <select [(ngModel)]="newSpender">
+          <option value="Dad">👨🏻 爸爸</option>
+          <option value="Mom">👩🏻 媽媽</option>
+        </select>
       </div>
 
-      <button class="primary-btn" (click)="add()">
+      <ion-button color="primary" expand="block" (click)="add()">
         記下一筆
-      </button>
+      </ion-button>
     </div>
 
     <div class="list-section">
@@ -81,6 +79,20 @@
           {{ trans.amount | number }}
         </div>
       </div>
+    </div>
+
+  </div>
+
+  <div class="row-inputs">
+    <div class="amount-input-wrapper">
+      </div>
+    <div style="display: flex; gap: 8px;">
+      <!-- <ion-button color="primary" (click)="scanInvoice()">
+        <ion-icon name="scan-outline" slot="icon-only"></ion-icon>
+      </ion-button> -->
+      <ion-button color="primary" fill="outline" (click)="openSyncModal()">
+        <ion-icon name="cloud-download-outline" slot="icon-only"></ion-icon>
+      </ion-button>
     </div>
 
   </div>
