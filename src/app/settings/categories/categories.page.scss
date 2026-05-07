@@ -1,6 +1,7 @@
-@import '../../../global.scss';
+// 全域樣式由 Angular 自動套用 global.scss,這裡不需要再 @import
+// (重複 import 會把 Ionic core CSS 380 KB 灌進 component scope,觸發 budget error)
 
-// 👇 新增這個 RWD 容器設定
+// 👇 RWD 容器設定
 .rwd-container {
   // 1. 設定最大寬度 (大約是一般手機或小平板的寬度)
   max-width: 600px;
