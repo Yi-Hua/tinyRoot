@@ -4,52 +4,65 @@
     <header class="app-header">
       <div class="ledger-switcher" (click)="openLedgerPicker()">
         <span class="dot"></span>
-        <span class="ledger-name">寶寶成長帳本</span>
+        <span class="ledger-name">{{ currentLedger?.name || '尚未選擇帳本' }}</span>
         <ion-icon name="chevron-down-outline"></ion-icon>
       </div>
-      <div class="user-avatar">
-        <img src="assets/avatar-mom.png" alt="Mom">
+      <div class="header-actions">
+        <ion-button fill="clear" size="small" (click)="openSyncModal()" aria-label="匯入發票">
+          <ion-icon name="cloud-download-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" size="small" (click)="goCategories()" aria-label="分類管理">
+          <ion-icon name="settings-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" size="small" (click)="signOut()" aria-label="登出">
+          <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+        </ion-button>
       </div>
     </header>
 
     <section class="summary-card">
-      <div class="label">本月支出預算</div>
+      <div class="label">本月支出</div>
       <div class="amount-row">
         <span class="currency">NT$</span>
         <span class="amount">{{ totalExpense | number }}</span>
       </div>
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="65"></div>
-        </div>
-        <div class="progress-info">
-          <span>已使用 65%</span>
-          <span>剩餘 $8,400</span>
-        </div>
+      <div class="progress-info">
+        <span>收入 NT$ {{ totalIncome | number }}</span>
+        <span *ngIf="totalIncome > 0">結餘 NT$ {{ (totalIncome - totalExpense) | number }}</span>
       </div>
     </section>
 
     <section class="record-section">
       <div class="section-title">
         <span>最近紀錄</span>
-        <ion-note>查看全部</ion-note>
+        <ion-note (click)="goCategories()">分類管理</ion-note>
       </div>
 
       <div class="record-list">
         <div *ngFor="let trans of transactions" class="record-item">
-          <div class="item-icon" [class]="trans.category">
-            {{ getEmoji(trans.category) }}
+          <div class="item-icon">
+            {{ getCategoryIcon(trans.category_id) }}
           </div>
           <div class="item-detail">
             <div class="top-row">
               <span class="desc">{{ trans.description }}</span>
-              <span class="price">{{ trans.amount | number }}</span>
+              <span class="price" [class.income]="trans.type === 'income'">
+                {{ trans.type === 'income' ? '+' : '' }}{{ trans.amount | number }}
+              </span>
             </div>
             <div class="bottom-row">
-              <span class="meta">{{ trans.date | date:'MM/dd' }} · {{ trans.spender === 'Dad' ? '爸爸' : '媽媽' }}</span>
-              <span class="tag">{{ trans.category }}</span>
+              <span class="meta">
+                {{ trans.date | date:'MM/dd' }}
+                <span *ngIf="trans.spender"> · {{ trans.spender }}</span>
+                <span *ngIf="trans.source === 'invoice'" class="badge-invoice">📄 發票</span>
+              </span>
+              <span class="tag">{{ getCategoryName(trans.category_id) }}</span>
             </div>
           </div>
+        </div>
+
+        <div *ngIf="transactions.length === 0" class="empty-state">
+          <p>還沒有任何紀錄,點下方 + 開始記帳吧 🌱</p>
         </div>
       </div>
     </section>

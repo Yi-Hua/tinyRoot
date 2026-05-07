@@ -70,4 +70,13 @@ export class AuthService {
   getCurrentUserId(): string | null {
     return this._currentUser.value?.id || null;
   }
+
+  // 給 Guard 用:確實去 Supabase 拿一次 session (處理 App 剛啟動還沒完成 hydration 的情況)
+  async getCurrentUser() {
+    const { data } = await this.supabase.auth.getUser();
+    if (data.user) {
+      this._currentUser.next(data.user);
+    }
+    return data.user ?? null;
+  }
 }

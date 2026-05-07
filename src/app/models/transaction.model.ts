@@ -1,20 +1,48 @@
-// 定義三種支出類別 (50/30/20 法則)
-export type BudgetCategory = 'Needs' | 'Wants' | 'Savings' | 'Culture';
-
-// 定義一筆交易的結構
-export interface Transaction {
-  id?: number;           // 資料庫會自動產生，所以設為可選 (?)
-  created_at?: string;   // 建立時間
-  date: string;          // 消費日期
-  description: string;   // 項目名稱 (例如：奶粉)
-  amount: number;        // 金額
-  category: BudgetCategory; // 類別
-  spender: string;       // 付款人
+// 帳本本身 (例如:夫妻共享、私人帳本)
+export interface Ledger {
+  id?: string;
+  name: string;
+  type?: 'personal' | 'shared';
+  owner_id?: string;            // profiles.id
+  created_at?: string;
 }
 
-export interface Category {
-  id: string;        // 分類代號 (例如: 'food')
-  name: string;      // 分類名稱 (例如: '飲食')
-  icon: string;      // 圖示名稱 (例如: 'fast-food-outline')
-  type: 'expense' | 'income'; // 支出或收入
+// 錢包/帳戶 (現金、銀行、信用卡、電子支付)
+export interface Account {
+  id?: string;
+  ledger_id: string;
+  name: string;
+  type: string;                 // 'cash' | 'bank' | 'credit_card' | 'ewallet'
+  balance?: number;
+  created_at?: string;
+}
+
+// 一筆交易紀錄 (對齊 v2.0 schema)
+export interface Transaction {
+  id?: string;
+  created_at?: string;
+  ledger_id: string;            // 屬於哪一本帳本
+  account_id?: string | null;   // 從哪個錢包/帳戶扣錢 (可選)
+  category_id?: string | null;  // 分類 FK
+  profile_id?: string | null;   // 紀錄/付款的人 (auth.uid)
+  amount: number;
+  description: string;
+  date: string;                 // 'YYYY-MM-DD' (Postgres date 型別)
+  type: 'expense' | 'income';
+  source?: 'manual' | 'invoice';
+  invoice_num?: string;         // 載具發票號碼,匯入去重用
+  spender?: string;             // 自由文字「誰付的」例:爸爸 / 媽媽
+}
+
+// 預算 (預留給之後做)
+export interface Budget {
+  id?: string;
+  ledger_id: string;
+  category_id?: string;
+  name: string;
+  limit_amount: number;
+  period: 'monthly' | 'yearly' | 'custom';
+  start_date?: string;
+  end_date?: string;
+  created_at?: string;
 }

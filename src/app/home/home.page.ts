@@ -1,21 +1,25 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonInput, IonButton, IonContent, IonDatetime, IonDatetimeButton, IonModal,
-  IonIcon, IonFab, IonFabButton, IonNote, // 補上遺失的元件
-  AlertController, ToastController
+  IonContent, IonButton, IonIcon, IonFab, IonFabButton, IonNote,
+  AlertController, ToastController, LoadingController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   add, wallet, leaf, calendarOutline, createOutline,
   cashOutline, leafOutline, scanOutline, cloudDownloadOutline,
-  chevronDownOutline // 補上 HTML 用到的圖示
+  chevronDownOutline, logOutOutline, settingsOutline
 } from 'ionicons/icons';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 
 import { BudgetService } from '../services/budget.service';
-import { Transaction, BudgetCategory } from '../models/transaction.model';
+import { Transaction, Ledger } from '../models/transaction.model';
 import { InvoiceService } from '../services/invoice.service';
+import { CategoryService, Category } from '../services/category.service';
+import { LedgerService } from '../services/ledger.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -24,116 +28,102 @@ import { InvoiceService } from '../services/invoice.service';
   standalone: true,
   imports: [
     CommonModule, FormsModule,
-    IonContent, IonInput, IonDatetime, IonDatetimeButton, IonModal,
-    IonButton, IonIcon, IonFab, IonFabButton, IonNote // 這裡也要同步匯入
+    IonContent, IonButton, IonIcon, IonFab, IonFabButton, IonNote
   ],
 })
 export class HomePage implements OnInit {
   private budgetService = inject(BudgetService);
   private invoiceService = inject(InvoiceService);
+  private categoryService = inject(CategoryService);
+  private ledgerService = inject(LedgerService);
+  private auth = inject(AuthService);
   private alertCtrl = inject(AlertController);
   private toastCtrl = inject(ToastController);
+  private loadingCtrl = inject(LoadingController);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   transactions: Transaction[] = [];
+  categories: Category[] = [];
+  ledgers: Ledger[] = [];
+  currentLedger: Ledger | null = null;
+
   totalExpense = 0;
-
-  // 新增育兒分類體系
-  public appCategories = [
-    { id: 'baby_daily', name: '寶貝日常', emoji: '🍼' },
-    { id: 'education', name: '教育成長', emoji: '📚' },
-    { id: 'health', name: '醫療保健', emoji: '🏥' },
-    { id: 'family', name: '家庭生活', emoji: '🏠' },
-    { id: 'self_care', name: '自我愛護', emoji: '☕️' }
-  ];
-
-  newDate: string = new Date().toISOString();
-  newDesc: string = '';
-  newAmount: number | null = null;
-  newCategory: string = 'baby_daily'; // 修改為預設育兒分類
-  newSpender: string = 'Dad';
+  totalIncome = 0;
+  defaultSpender = '我';
 
   constructor() {
     addIcons({
       add, wallet, leaf, calendarOutline, createOutline,
       cashOutline, leafOutline, scanOutline, cloudDownloadOutline,
-      chevronDownOutline
+      chevronDownOutline, logOutOutline, settingsOutline
     });
   }
 
-  async ngOnInit() {
-    await this.loadData();
+  ngOnInit() {
+    this.budgetService.transactions$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(tx => {
+        this.transactions = tx;
+        this.totalExpense = this.sumByType(tx, 'expense');
+        this.totalIncome  = this.sumByType(tx, 'income');
+      });
+
+    this.categoryService.categories$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(cats => this.categories = cats);
+
+    this.ledgerService.ledgers$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(ls => this.ledgers = ls);
+
+    this.ledgerService.currentLedger$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(l => this.currentLedger = l);
   }
 
-  async loadData() {
-    this.transactions = await this.budgetService.getTransactions();
-    this.totalExpense = this.transactions.reduce((sum, t) => sum + t.amount, 0);
+  // ===== 顯示 helpers =====
+  getCategoryIcon(id?: string | null): string {
+    if (!id) return '🌱';
+    return this.categoryService.findById(id)?.icon ?? '🌱';
+  }
+  getCategoryName(id?: string | null): string {
+    if (!id) return '未分類';
+    return this.categoryService.findById(id)?.name ?? '未分類';
+  }
+  private sumByType(tx: Transaction[], type: 'expense' | 'income'): number {
+    return tx
+      .filter(t => t.type === type)
+      .reduce((s, t) => s + (Number(t.amount) || 0), 0);
   }
 
-  // ✨ 修復：HTML 裡呼叫的 getEmoji
-  getEmoji(categoryId: string): string {
-    const cat = this.appCategories.find(c => c.id === categoryId);
-    return cat ? cat.emoji : '🌱';
-  }
-
-  // ✨ 修復：HTML 裡呼叫的切換帳本功能
+  // ===== 切換 / 建立帳本 =====
   async openLedgerPicker() {
-    const alert = await this.alertCtrl.create({
-      header: '切換帳本',
-      buttons: ['確定']
-    });
-    await alert.present();
-  }
-
-  // ✨ 修復：HTML 裡呼叫的開啟新增視窗 (先用原本的 syncModal 替代或跳出 Alert)
-  async openAddModal() {
-    // 暫時導向妳原本的載具載入，或者妳可以這裡寫開啟 Modal 的邏輯
-    await this.openSyncModal();
-  }
-
-  // 原本的記帳邏輯
-  async add() {
-    if (!this.newDesc || !this.newAmount) {
-      this.showAlert('欄位未填', '請輸入項目和金額喔！');
+    if (!this.ledgers.length) {
+      await this.openCreateLedger();
       return;
     }
 
-    const newTx: any = { // 暫時用 any 避免跟舊的 Model 型別衝突
-      date: this.newDate,
-      description: this.newDesc,
-      amount: this.newAmount,
-      category: this.newCategory,
-      spender: this.newSpender
-    };
+    const inputs = this.ledgers.map(l => ({
+      name: 'ledger',
+      type: 'radio' as const,
+      label: `${l.type === 'shared' ? '👨‍👩‍👧 ' : '👤 '}${l.name}`,
+      value: l.id || '',
+      checked: this.currentLedger?.id === l.id,
+    }));
 
-    await this.budgetService.addTransaction(newTx);
-    await this.loadData();
-    this.newDesc = '';
-    this.newAmount = null;
-
-    const toast = await this.toastCtrl.create({
-      message: '記帳成功！',
-      duration: 2000,
-      position: 'bottom'
-    });
-    await toast.present();
-  }
-
-  // 妳原本的載具同步邏輯 (保留不變)
-  async openSyncModal() {
     const alert = await this.alertCtrl.create({
-      header: '載入載具發票',
-      inputs: [
-        { name: 'barcode', type: 'text', placeholder: '手機條碼', value: localStorage.getItem('user_barcode') || '' },
-        { name: 'verifyCode', type: 'password', placeholder: '驗證碼' }
-      ],
+      header: '切換帳本',
+      inputs,
       buttons: [
         { text: '取消', role: 'cancel' },
+        { text: '建立新的...', handler: () => { this.openCreateLedger(); return true; } },
         {
-          text: '載入',
-          handler: async (data) => {
-            if (data.barcode && data.verifyCode) {
-              localStorage.setItem('user_barcode', data.barcode);
-              await this.syncData(data.barcode, data.verifyCode);
+          text: '切換',
+          handler: (value: any) => {
+            if (typeof value === 'string') {
+              const target = this.ledgers.find(l => l.id === value);
+              if (target) this.ledgerService.setCurrentLedger(target);
             }
           }
         }
@@ -142,33 +132,232 @@ export class HomePage implements OnInit {
     await alert.present();
   }
 
-  async syncData(barcode: string, verifyCode: string) {
-    const loading = await this.alertCtrl.create({ header: '載入中...', buttons: [] });
-    await loading.present();
-    try {
-      const today = new Date();
-      const lastMonth = new Date();
-      lastMonth.setMonth(today.getMonth() - 1);
-      const fmtDate = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, '/');
+  async openCreateLedger() {
+    const alert = await this.alertCtrl.create({
+      header: '建立新帳本',
+      message: '個人帳本只有自己可看;共享帳本可以邀請另一半',
+      inputs: [
+        { name: 'name', type: 'text', placeholder: '帳本名稱(例:我的私房錢)' },
+      ],
+      buttons: [
+        { text: '取消', role: 'cancel' },
+        { text: '建立(個人)', handler: async (data) => { await this.createWithType(data?.name, 'personal'); } },
+        { text: '建立(共享)', handler: async (data) => { await this.createWithType(data?.name, 'shared'); } }
+      ]
+    });
+    await alert.present();
+  }
 
-      const invoices = await this.invoiceService.syncInvoices(barcode, verifyCode, fmtDate(lastMonth), fmtDate(today));
-      loading.dismiss();
-
-      if (invoices && invoices.length > 0) {
-        const latest = invoices[0];
-        this.newAmount = latest.amount;
-        this.newDesc = `${latest.sellerName}`;
-        this.newDate = new Date(latest.invDate).toISOString();
-        await this.showAlert('載入成功', `已填入最近一筆：${latest.sellerName}`);
-      }
-    } catch (error) {
-      loading.dismiss();
-      await this.showAlert('同步失敗', '連線異常');
+  private async createWithType(name: string, type: 'personal' | 'shared') {
+    const trimmed = (name || '').trim();
+    if (!trimmed) { this.toast('帳本名稱不能空白'); return; }
+    const ledger = await this.ledgerService.createLedger(trimmed, type);
+    if (ledger) {
+      await this.ledgerService.loadLedgers();
+      this.ledgerService.setCurrentLedger(ledger);
+      this.toast(`已建立:${trimmed}`);
+    } else {
+      this.toast('建立失敗,請確認 SQL 已執行');
     }
   }
 
-  async showAlert(header: string, message: string) {
-    const alert = await this.alertCtrl.create({ header, message, buttons: ['好'] });
+  // ===== 新增記帳 =====
+  async openAddModal() {
+    if (!this.currentLedger) {
+      this.toast('請先選擇或建立一個帳本');
+      return;
+    }
+    if (this.categories.filter(c => c.type === 'expense').length === 0) {
+      const a = await this.alertCtrl.create({
+        header: '尚無分類',
+        message: '請先到「分類管理」建立至少一個分類',
+        buttons: [
+          { text: '取消', role: 'cancel' },
+          { text: '前往設定', handler: () => this.router.navigate(['/settings/categories']) }
+        ]
+      });
+      await a.present();
+      return;
+    }
+
+    const step1 = await this.alertCtrl.create({
+      header: '新增一筆',
+      inputs: [
+        { name: 'description', type: 'text', placeholder: '項目(例:奶粉)' },
+        { name: 'amount', type: 'number', placeholder: '金額' },
+      ],
+      buttons: [
+        { text: '取消', role: 'cancel' },
+        {
+          text: '下一步',
+          handler: async (data) => {
+            const desc = (data?.description || '').trim();
+            const amt = Number(data?.amount);
+            if (!desc || !amt || amt <= 0) {
+              this.toast('項目和金額不能空白');
+              return false;
+            }
+            await this.openCategoryPicker(desc, amt);
+            return true;
+          }
+        }
+      ]
+    });
+    await step1.present();
+  }
+
+  private async openCategoryPicker(description: string, amount: number) {
+    const expenses = this.categories.filter(c => c.type === 'expense');
+    const inputs = expenses.map((c, i) => ({
+      name: 'category',
+      type: 'radio' as const,
+      label: `${c.icon} ${c.name}`,
+      value: c.id,
+      checked: i === 0
+    }));
+
+    const alert = await this.alertCtrl.create({
+      header: '選擇分類',
+      subHeader: `${description} - $${amount}`,
+      inputs,
+      buttons: [
+        { text: '上一步', role: 'cancel' },
+        {
+          text: '完成',
+          handler: async (categoryId: any) => {
+            if (typeof categoryId !== 'string' || !categoryId) {
+              this.toast('請選一個分類');
+              return false;
+            }
+            const cat = this.categoryService.findById(categoryId);
+            try {
+              await this.budgetService.addTransaction({
+                date: this.todayDate(),
+                description,
+                amount,
+                category_id: categoryId,
+                type: cat?.type ?? 'expense',
+                spender: this.defaultSpender,
+                source: 'manual',
+              });
+              this.toast('記帳成功 🌱');
+              return true;
+            } catch (e: any) {
+              this.toast('儲存失敗:' + (e?.message || ''));
+              return false;
+            }
+          }
+        }
+      ]
+    });
     await alert.present();
+  }
+
+  // ===== 載具發票匯入 =====
+  async openSyncModal() {
+    if (!this.currentLedger) {
+      this.toast('請先選擇帳本');
+      return;
+    }
+    const alert = await this.alertCtrl.create({
+      header: '匯入載具發票',
+      message: '輸入手機條碼跟驗證碼,自動把最近 30 天的發票匯入記帳',
+      inputs: [
+        { name: 'barcode', type: 'text', placeholder: '手機條碼(/ABC+123)', value: localStorage.getItem('user_barcode') || '' },
+        { name: 'verifyCode', type: 'password', placeholder: '驗證碼' }
+      ],
+      buttons: [
+        { text: '取消', role: 'cancel' },
+        {
+          text: '匯入',
+          handler: async (data) => {
+            if (!data?.barcode || !data?.verifyCode) {
+              this.toast('條碼和驗證碼都要填');
+              return false;
+            }
+            localStorage.setItem('user_barcode', data.barcode);
+            await this.syncData(data.barcode, data.verifyCode);
+            return true;
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private async syncData(barcode: string, verifyCode: string) {
+    const loading = await this.loadingCtrl.create({ message: '匯入中...' });
+    await loading.present();
+    try {
+      const today = new Date();
+      const last  = new Date();
+      last.setMonth(today.getMonth() - 1);
+      const fmtSlash = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, '/');
+
+      const invoices = await this.invoiceService.syncInvoices(
+        barcode, verifyCode, fmtSlash(last), fmtSlash(today)
+      );
+
+      if (!invoices || invoices.length === 0) {
+        await loading.dismiss();
+        await this.showAlert('沒有發票', '這段時間沒有可匯入的發票');
+        return;
+      }
+
+      const defaultCat = this.categories.find(c => c.type === 'expense');
+      if (!defaultCat) {
+        await loading.dismiss();
+        await this.showAlert('尚無分類', '請先到「分類管理」建立至少一個支出分類再匯入');
+        return;
+      }
+
+      const rows = invoices.map(inv => ({
+        date: this.toDateOnly(inv.invDate),
+        description: inv.sellerName || '發票消費',
+        amount: Number(inv.amount) || 0,
+        category_id: defaultCat.id,
+        type: 'expense' as const,
+        spender: this.defaultSpender,
+        source: 'invoice' as const,
+        invoice_num: inv.invNum,
+      }));
+
+      const result = await this.budgetService.addTransactionsBulk(rows);
+      await loading.dismiss();
+      this.toast(`匯入完成:新增 ${result.inserted} 筆 / 跳過重複 ${result.skipped} 筆`);
+    } catch (error: any) {
+      await loading.dismiss();
+      await this.showAlert('匯入失敗', error?.message || '連線異常');
+    }
+  }
+
+  // 把財政部 "2023/10/20" 轉成 Postgres date 格式 'YYYY-MM-DD'
+  private toDateOnly(s: string): string {
+    if (!s) return this.todayDate();
+    const [y, m, d] = s.split('/').map(Number);
+    if (!y || !m || !d) return this.todayDate();
+    return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+  private todayDate(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }
+
+  // ===== 通用 =====
+  goCategories() { this.router.navigate(['/settings/categories']); }
+
+  async signOut() {
+    await this.auth.signOut();
+    this.router.navigate(['/login']);
+  }
+
+  private async toast(message: string) {
+    const t = await this.toastCtrl.create({ message, duration: 1800, position: 'bottom' });
+    t.present();
+  }
+
+  private async showAlert(header: string, message: string) {
+    const a = await this.alertCtrl.create({ header, message, buttons: ['好'] });
+    await a.present();
   }
 }
